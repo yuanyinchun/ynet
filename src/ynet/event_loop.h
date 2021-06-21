@@ -2,7 +2,22 @@
 
 #include <list>
 #include "ynet/channel.h"
+#include "ynet/dispatcher.h"
+#include <mutex>
 
+class ChannelOperation
+{
+public:
+  enum class OP
+  {
+    ADD,
+    DEL,
+    MOD
+  };
+
+  OP op;
+  Channel* channel;
+};
 
 class EventLoop {
  public:
@@ -11,7 +26,7 @@ class EventLoop {
 
   void add_channel(Channel* channel);
   void del_channel(Channel* channel);
-  void update_channel(Channel* channel);
+  void mod_channel(Channel* channel);
 
   void start();
 
@@ -19,5 +34,8 @@ class EventLoop {
   void handle_pending_channel();
 
  private:
-  std::list<Channel*> pending_channel_;
+  bool quit_;
+  Dispatcher* dispatcher_;
+  std::vector<ChannelOperation> pending_channel_;
+  std::mutex mtx_;
 };

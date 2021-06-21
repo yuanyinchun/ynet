@@ -2,10 +2,15 @@
 
 #include <functional>
 
+enum EVENT {
+  READ,
+  WRITE
+};
+
 class Channel {
  public:
   int fd;
   int events;
-  std::function<void()> read_callback;
-  std::function<void()> write_callback;
+  std::function<void(int)> read_callback;
+  std::function<void(int)> write_callback;
 };
