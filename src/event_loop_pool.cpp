@@ -16,14 +16,11 @@ EventLoopPool::EventLoopPool(int sub_num)
 
 void EventLoopPool::start()
 {
-    //start main event loop
-    main_event_loop_->start();
     //start sub event loops
     for(int i=0; i<sub_event_loops_.size(); i++)
     {
         sub_threads.push_back(thread(&EventLoopPool::run, this, i));
-    }
-    
+    }    
 }
 
 void EventLoopPool::run(int i)

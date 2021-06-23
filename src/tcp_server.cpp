@@ -1,9 +1,14 @@
 #include "ynet/tcp_server.h"
+
+#include "ynet/event_loop_pool.h"
+#include "ynet/session.h"
+
 #include <sys/socket.h>
 #include <cstring>
 #include <netinet/in.h>
 #include <iostream>
 #include <fcntl.h>
+
 
 using namespace std;
 
@@ -53,51 +58,49 @@ int TcpServer::create_listen_fd(uint16_t listen_port)
 }
 
 
-void TcpServer::listen_fd_read_callback(int fd)
+void TcpServer::listen_fd_read_callback()
 {
     sockaddr_in client_addr;
     socklen_t socklen = sizeof(client_addr);
-    int connect_fd = accept(fd, (sockaddr*)&client_addr, &socklen);
+    int connect_fd = accept(listen_fd, (sockaddr*)&client_addr, &socklen);
     if(connect_fd == -1)
     {
-	cerr << "accept error: " << strerror(errno) << endl;
-	return;
+        cerr << "accept error: " << strerror(errno) << endl;
+        return;
     }
 
-    fcntl(fd, F_SETFL, O_NONBLOCK);
+    fcntl(listen_fd, F_SETFL, O_NONBLOCK);
 
     EventLoop* sub_event_loop = event_loop_pool_->get_sub_event_loop();
-    Channel ch;
-    ch.fd = fd;
-    ch.events |= EVENT::READ;
-    ch.events |= EVENT::WRITE;
-    ch.read_callback = std::bind(&TcpServer::connect_fd_read_callback, this, std::placeholders::_1);
-    ch.write_callback = std::bind(&TcpServer::connect_fd_write_callback, this, std::placeholders::_1);
-    sub_event_loop->add_channel(&ch);
-}
-
-void TcpServer::connect_fd_read_callback(int fd)
-{
-
-}
-
-void TcpServer::connect_fd_write_callback(int fd)
-{
-	
+    Session* session = new Session(connect_fd, sub_event_loop, 
+                    std::bind(&TcpServer::on_connected, this, std::placeholders::_1), 
+                    std::bind(&TcpServer::on_disconnected, this, std::placeholders::_1),
+                    std::bind(&TcpServer::on_message, this, std::placeholders::_1, std::placeholders::_2), 
+                    std::bind(&TcpServer::on_written, this, std::placeholders::_1)
+                    );
 }
 
 bool TcpServer::start(uint16_t listen_port, int sub_event_loop_num)
 {
-    int fd = create_listen_fd(listen_port);
+    //start event loop pool
     event_loop_pool_ = new EventLoopPool(sub_event_loop_num);
     event_loop_pool_->start();
 
-    EventLoop* main_event_loop = event_loop_pool_->get_main_event_loop();
-    Channel ch;
-    ch.fd = fd;
-    ch.events |= EVENT::READ;
-    ch.read_callback = std::bind(&TcpServer::listen_fd_read_callback, this, std::placeholders::_1);
-    main_event_loop->add_channel(&ch);
-
+    //start listen event loop
+    start_listen_event_loop(listen_port, sub_event_loop_num);
     return true;
+}
+
+void TcpServer::start_listen_event_loop(uint16_t listen_port, int sub_event_loop_num)
+{
+    int listen_fd = create_listen_fd(listen_port);
+
+    EventLoop* main_event_loop = event_loop_pool_->get_main_event_loop();
+    int events;
+    events |= EVENT::READ;
+    Channel* channel = new Channel(listen_fd, events, std::bind(&TcpServer::listen_fd_read_callback, this), nullptr, nullptr);
+    
+    main_event_loop->add_channel(channel);
+
+    main_event_loop->start();
 }

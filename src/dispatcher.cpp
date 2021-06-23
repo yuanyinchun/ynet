@@ -110,12 +110,12 @@ void Dispatcher::dispatch()
 
 	if(epe->events & EPOLLIN)
 	{
-	    channel->read_callback(fd);
+	    channel->read_callback(channel->data);
 	}
 
 	if(epe->events & EPOLLOUT)
 	{
-	    channel->write_callback(fd);
+	    channel->write_callback(channel->data);
 	}
     }
 }
