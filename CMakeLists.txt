@@ -5,9 +5,12 @@ include(CTest)
 enable_testing()
 
 add_library(${PROJECT_NAME}
+    src/buffer.cpp
+    src/channel.cpp
     src/dispatcher.cpp
     src/event_loop_pool.cpp
     src/event_loop.cpp
+    src/session.cpp
     src/tcp_server.cpp
 )
 

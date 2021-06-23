@@ -4,29 +4,6 @@
 
 using namespace std;
 
-Session::Session(int connect_fd, EventLoop* event_loop, 
-  	std::function<int(Session*)> on_connected, std::function<int(Session*)> on_disconnected,
-	std::function<int(Buffer*, Session*)> on_message, std::function<int(Session*)> on_written)
-{
-    event_loop = event_loop;
-    on_connected = on_connected;
-    on_disconnected = on_disconnected;
-    on_message = on_message;
-    on_written = on_written;
-    input_buffer = new Buffer();
-    output_buffer = new Buffer();
-
-    channel = new Channel(connect_fd, EVENT::READ | EVENT::WRITE, handle_read, handle_write, this);
-    event_loop->add_channel(channel);
-    on_connected(this);
-}
-
-Session::~Session()
-{
-    delete input_buffer;
-    delete output_buffer;
-}
-
 void handle_closed(Session* session)
 {
     EventLoop* event_loop = session->event_loop;
@@ -69,6 +46,29 @@ void handle_write(void* data)
     }
 }
 
+Session::Session(int connect_fd, EventLoop* event_loop, 
+  	std::function<int(Session*)> on_connected, std::function<int(Session*)> on_disconnected,
+	std::function<int(Buffer*, Session*)> on_message, std::function<int(Session*)> on_written)
+{
+    event_loop = event_loop;
+    on_connected = on_connected;
+    on_disconnected = on_disconnected;
+    on_message = on_message;
+    on_written = on_written;
+    input_buffer = new Buffer();
+    output_buffer = new Buffer();
+
+    channel = new Channel(connect_fd, EVENT::READ | EVENT::WRITE, handle_read, handle_write, this);
+    event_loop->add_channel(channel);
+    on_connected(this);
+}
+
+Session::~Session()
+{
+    delete input_buffer;
+    delete output_buffer;
+}
+
 int Session::send_data(void* data, int size)
 {
     if(!data)
@@ -80,7 +80,7 @@ int Session::send_data(void* data, int size)
 int Session::send_buffer(Buffer* buffer)
 {
     int size = buffer->get_readable_size();
-    int ret = send_data(&buffer->data_[buffer->read_index_], size);
-    buffer->read_index_ += size;
+    int ret = send_data(&buffer->bf[buffer->read_index], size);
+    buffer->read_index += size;
     return ret;
 }

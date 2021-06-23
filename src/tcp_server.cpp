@@ -80,22 +80,22 @@ void TcpServer::listen_fd_read_callback()
                     );
 }
 
-bool TcpServer::start(uint16_t listen_port, int sub_event_loop_num)
+void TcpServer::start(uint16_t listen_port, int sub_event_loop_num)
 {
-    //start event loop pool
+    //create and start sub event loop pool
     event_loop_pool_ = new EventLoopPool(sub_event_loop_num);
     event_loop_pool_->start();
 
-    //start listen event loop
-    start_listen_event_loop(listen_port, sub_event_loop_num);
-    return true;
+    //start main event loop
+    start_main_event_loop(listen_port, sub_event_loop_num);
 }
 
-void TcpServer::start_listen_event_loop(uint16_t listen_port, int sub_event_loop_num)
+void TcpServer::start_main_event_loop(uint16_t listen_port, int sub_event_loop_num)
 {
     int listen_fd = create_listen_fd(listen_port);
 
     EventLoop* main_event_loop = event_loop_pool_->get_main_event_loop();
+
     int events;
     events |= EVENT::READ;
     Channel* channel = new Channel(listen_fd, events, std::bind(&TcpServer::listen_fd_read_callback, this), nullptr, nullptr);

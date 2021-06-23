@@ -36,6 +36,9 @@ EventLoop* EventLoopPool::get_main_event_loop()
 
 EventLoop* EventLoopPool::get_sub_event_loop()
 {
+    if(sub_event_loops_.size() == 0)
+        return main_event_loop_;
+    
     int next_pos = (++curr_sub_pos_) % sub_event_loops_.size();
     return sub_event_loops_[next_pos];
 }
