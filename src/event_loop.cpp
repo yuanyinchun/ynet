@@ -17,6 +17,13 @@ EventLoop::EventLoop()
         cerr << "create socket pair failed" << endl;
         exit(-1);
     }
+
+    int events;
+    events |= EVENT::READ;
+    Channel* channel = new Channel(socket_pair_[1], events, 
+                    std::bind(&EventLoop::handle_wake_up, this), 
+                    nullptr, this);
+    add_channel(channel);
 }
 
 EventLoop::~EventLoop()
@@ -93,6 +100,17 @@ void EventLoop::wake_up()
     if(ret != sizeof(a))
     {
         cerr << "wake_up failed" << endl;
+        exit(-1);
+    }
+}
+
+void EventLoop::handle_wake_up()
+{
+    char a;
+    int ret = read(socket_pair_[1], &a, sizeof(a));
+    if(ret != sizeof(a))
+    {
+        cerr << "handle_wake_up read failed" << endl;
         exit(-1);
     }
 }

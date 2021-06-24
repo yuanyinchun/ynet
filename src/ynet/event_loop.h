@@ -37,6 +37,7 @@ class EventLoop {
   void handle_pending_channel();
   bool is_same_thread();
   void wake_up();
+  void handle_wake_up();
 
  private:
   bool quit_;
