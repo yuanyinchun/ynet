@@ -29,7 +29,7 @@ void Dispatcher::add_channel(Channel* channel)
     if(channel->events & EVENT::READ)
     	e.events |= EPOLLIN;
     if(channel->events & EVENT::WRITE)
-	e.events |= EPOLLOUT;
+        e.events |= EPOLLOUT;
     int ret = epoll_ctl(epfd,EPOLL_CTL_ADD, fd, &e);
     if(ret == -1)
     {
@@ -48,7 +48,7 @@ void Dispatcher::del_channel(Channel* channel)
     if(channel->events & EVENT::READ)
     	e.events |= EPOLLIN;
     if(channel->events & EVENT::WRITE)
-	e.events |= EPOLLOUT;
+        e.events |= EPOLLOUT;
     int ret = epoll_ctl(epfd,EPOLL_CTL_DEL, fd, &e);
     if(ret == -1)
     {
@@ -71,7 +71,7 @@ void Dispatcher::mod_channel(Channel* channel)
     if(channel->events & EVENT::READ)
     	e.events |= EPOLLIN;
     if(channel->events & EVENT::WRITE)
-	e.events |= EPOLLOUT;
+        e.events |= EPOLLOUT;
     int ret = epoll_ctl(epfd,EPOLL_CTL_MOD, fd, &e);
     if(ret == -1)
     {
@@ -84,7 +84,7 @@ void Dispatcher::mod_channel(Channel* channel)
 
 void Dispatcher::dispatch()
 {
-    int n = epoll_wait(epfd, &events_buffer[0], events_buffer_size, 3);
+    int n = epoll_wait(epfd, &events_buffer[0], events_buffer_size, -1);
     if(n == -1)
     {
 	cerr << "dispatch error:" << strerror(errno) << endl;
@@ -93,29 +93,29 @@ void Dispatcher::dispatch()
 
     for(int i=0; i<n; i++)
     {
-	epoll_event* epe = &events_buffer[i];
-	int fd = epe->data.fd;
+        epoll_event* epe = &events_buffer[i];
+        int fd = epe->data.fd;
 
-	auto itr = channel_map.find(fd);
-	if(itr == channel_map.end())
-	    continue;
-	Channel* channel = itr->second;
+        auto itr = channel_map.find(fd);
+        if(itr == channel_map.end())
+            continue;
+        Channel* channel = itr->second;
 
-	if(epe->events & EPOLLERR || epe->events & EPOLLHUP)
-	{
-	    cerr << "epoll error, fd:" << fd << endl;
-	    close(fd);
-	    continue;
-	}
+        if(epe->events & EPOLLERR || epe->events & EPOLLHUP)
+        {
+            cerr << "epoll error, fd:" << fd << endl;
+            close(fd);
+            continue;
+        }
 
-	if(epe->events & EPOLLIN)
-	{
-	    channel->read_callback(channel->data);
-	}
+        if(epe->events & EPOLLIN)
+        {
+            channel->read_callback(channel->data);
+        }
 
-	if(epe->events & EPOLLOUT)
-	{
-	    channel->write_callback(channel->data);
-	}
+        if(epe->events & EPOLLOUT)
+        {
+            channel->write_callback(channel->data);
+        }
     }
 }

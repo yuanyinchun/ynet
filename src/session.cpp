@@ -20,8 +20,8 @@ void handle_read(void* data)
     int ret = input_buffer->read_socket(channel->fd);
     if(ret<=0)
     {
-	cerr << "handle_read error" << endl;
-	handle_closed(session);
+        cerr << "handle_read error" << endl;
+        handle_closed(session);
     }
 
     session->on_message(input_buffer, session);
@@ -36,13 +36,13 @@ void handle_write(void* data)
     ssize_t ret = write(channel->fd, &output_buffer->bf[output_buffer->read_index], output_buffer->get_readable_size());
     if(ret>0)
     {
-	output_buffer->read_index += ret;
-	if(output_buffer->get_readable_size() == 0)
-	{
-	    cout << "write complete" << endl;
-	}
+        output_buffer->read_index += ret;
+        if(output_buffer->get_readable_size() == 0)
+        {
+            cout << "write complete" << endl;
+        }
 
-	session->on_written(session);
+        session->on_written(session);
     }
 }
 

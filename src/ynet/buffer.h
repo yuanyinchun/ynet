@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-class Session;
-
 class Buffer{
  public:
   Buffer();
@@ -14,7 +12,7 @@ class Buffer{
   int get_readable_size();
   int get_front_spare_size();
   void append(void* data, int size);
-  void append_char(char data);
+  void append_char(char c);
   void append_string(const std::string& str);
   int read_socket(int fd);
  
@@ -25,6 +23,4 @@ class Buffer{
   std::vector<char> bf;
   int read_index;
   int write_index;
-
-  friend class Session;
 };

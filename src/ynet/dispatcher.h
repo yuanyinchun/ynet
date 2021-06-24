@@ -5,7 +5,7 @@
 #include <vector>
 #include <sys/epoll.h>
 
-class Dispatcher{
+class Dispatcher {
  public:
   Dispatcher();
   ~Dispatcher();

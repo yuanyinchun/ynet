@@ -20,5 +20,5 @@ class Channel {
   int events;
   std::function<void(void*)> read_callback;
   std::function<void(void*)> write_callback;
-  void* data;
+  void* data;   //callback with this data
 };
