@@ -12,7 +12,7 @@ class Session{
 	std::function<int(Buffer*, Session*)> on_message, std::function<int(Session*)> on_written);
   ~Session();
 
-  int send_data(void* data, int size);
+  int send_data(void* data, size_t size);
   int send_buffer(Buffer* buffer);
 
  public:

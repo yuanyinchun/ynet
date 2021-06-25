@@ -40,6 +40,7 @@ void handle_write(void* data)
         if(output_buffer->get_readable_size() == 0)
         {
             cout << "write complete" << endl;
+            channel->disable_write_event();
         }
 
         session->on_written(session);
@@ -69,12 +70,28 @@ Session::~Session()
     delete output_buffer;
 }
 
-int Session::send_data(void* data, int size)
+int Session::send_data(void* data, size_t size)
 {
     if(!data)
-	return -1;
+	    return -1;
 
-    output_buffer->append(data, size);
+    int written_size = 0;
+    if(output_buffer->get_readable_size() == 0 && !channel->is_write_event_enabled())
+    {
+        written_size = write(channel->fd, data, size);
+        if(written_size<0)
+        {
+            written_size = 0;
+        }
+    }
+
+    int left_size = size - written_size;
+    if(left_size > 0)
+    {
+        output_buffer->append(data + written_size, left_size);
+        if(!channel->is_write_event_enabled())
+            channel->enable_write_event();
+    }
 }
 
 int Session::send_buffer(Buffer* buffer)
