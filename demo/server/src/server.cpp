@@ -3,6 +3,16 @@
 
 using namespace std;
 
+Server::Server()
+{
+
+}
+
+Server::~Server()
+{
+
+}
+
 int Server::on_connected(Session* session)
 {
     cout << "on_connected" << endl;

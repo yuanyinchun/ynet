@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <cstring>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ EventLoop::EventLoop()
     int ret = socketpair(AF_INET, SOCK_STREAM, 0, socket_pair_);
     if(ret == -1)
     {
-        cerr << "create socket pair failed" << endl;
+        cerr << "create socket pair failed: " << strerror(errno) << endl;
         exit(-1);
     }
 

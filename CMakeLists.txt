@@ -12,6 +12,8 @@ add_library(${PROJECT_NAME}
     src/event_loop.cpp
     src/session.cpp
     src/tcp_server.cpp
+    src/ynet/atomicops.h
+    src/ynet/readerwriterqueue.h
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -33,6 +35,7 @@ target_include_directories(${PROJECT_NAME}
 #     PRIVATE
 # )
 
-# target_link_libraries( ${PROJECT_NAME}
-#     PUBLIC
-# )
+target_link_libraries( ${PROJECT_NAME}
+    PUBLIC
+        pthread
+)
