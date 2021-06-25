@@ -59,7 +59,7 @@ Session::Session(int connect_fd, EventLoop* event_loop,
     input_buffer = new Buffer();
     output_buffer = new Buffer();
 
-    channel = new Channel(connect_fd, EVENT::READ | EVENT::WRITE, handle_read, handle_write, this);
+    channel = new Channel(connect_fd, EVENT::READ, handle_read, handle_write, this);
     event_loop->add_channel(channel);
     on_connected(this);
 }
